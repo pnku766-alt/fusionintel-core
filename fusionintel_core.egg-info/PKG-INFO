@@ -1,0 +1,98 @@
+Metadata-Version: 2.4
+Name: fusionintel-core
+Version: 0.1.0
+Summary: FusionIntel Core: Layer 4–8 sovereignty, delivery action, audit log, orchestrator, and CLI.
+Author: Pepsi M
+License: MIT
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: ruff>=0.5; extra == "dev"
+
+# FusionIntel Core (Layer 4–8)
+
+This repository contains a minimal, stable core pipeline:
+
+- **Layer 4**: Sovereignty compliance gate
+- **Layer 5**: Delivery action selection (deliver/quarantine/block)
+- **Layer 6**: Audit event builder + JSONL writer
+- **Layer 7**: Orchestrator pipeline (L4→L5→L6)
+- **Layer 8**: CLI (python -m orchestrator.cli)
+
+## Quickstart (Windows / PowerShell)
+
+Run tests:
+`powershell
+python .\scripts\run_tests.py
+python -m pip install -e ".[dev]"
+python -m orchestrator.cli --policy policy.json --envelope envelope.json
+
+---
+
+# Step 2 — Run these commands (PowerShell)
+
+`powershell
+python -m pip install -e ".[dev]"
+python scripts/run_tests.py
+git status --short
+git add .
+git commit -m "Add packaging (pyproject) + README + CI workflow"
+git tag v0.1.1
+git push
+git push origin v0.1.1
+gh release create v0.1.1 --title "v0.1.1 – Packaging + CI" --notes "Adds pyproject.toml for editable installs and GitHub Actions CI to run the test suite on push/PR."
+pwd
+Get-ChildItem pyproject.toml
+type pyproject.toml | Select-Object -First 20
+python -m pip install -e .[dev]
+python -m pip install -e ".[dev]"
+function Write-FileUtf8NoBom([string], [string]) {
+   = Split-Path -Parent 
+  if ( -and !(Test-Path )) { New-Item -ItemType Directory -Force -Path  | Out-Null }
+   = New-Object System.Text.UTF8Encoding(False)
+  [System.IO.File]::WriteAllText((Resolve-Path .).Path + "\" + , .Replace("
+","
+"), )
+}
+
+Write-FileUtf8NoBom "README.md" @"
+# FusionIntel Core (Layer 4–8)
+
+Stable core pipeline:
+
+- **Layer 4**: Sovereignty compliance gate
+- **Layer 5**: Delivery action selection (deliver/quarantine/block)
+- **Layer 6**: Audit event builder + JSONL writer
+- **Layer 7**: Orchestrator pipeline (L4→L5→L6)
+- **Layer 8**: CLI (python -m orchestrator.cli)
+
+## Quickstart (PowerShell)
+
+Install (dev):
+`powershell
+python -m pip install -e .[dev]
+python .\scripts\run_tests.py
+python -m orchestrator.cli --policy policy.json --envelope envelope.json
+
+---
+
+## 4) Add CI + LICENSE (if you haven’t yet)
+
+`powershell
+Write-FileUtf8NoBom "LICENSE" @"
+MIT License
+
+Copyright (c) 2026
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.

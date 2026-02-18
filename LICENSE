@@ -1,0 +1,30 @@
+﻿# FusionIntel Core (Layer 4–8)
+
+Stable core pipeline:
+
+- **Layer 4**: Sovereignty compliance gate
+- **Layer 5**: Delivery action selection (deliver/quarantine/block)
+- **Layer 6**: Audit event builder + JSONL writer
+- **Layer 7**: Orchestrator pipeline (L4→L5→L6)
+- **Layer 8**: CLI (`python -m orchestrator.cli`)
+
+## Quickstart (PowerShell)
+
+Install (dev):
+```powershell
+python -m pip install -e .[dev]
+python .\scripts\run_tests.py
+python -m orchestrator.cli --policy policy.json --envelope envelope.json
+
+---
+
+## Step D — add LICENSE (recommended)
+```powershell
+@'
+MIT License
+
+Copyright (c) 2026
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
