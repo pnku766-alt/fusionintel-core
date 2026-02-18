@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fusionintel-core"
+version = "0.1.0"
+description = "FusionIntel Core: Layer 4–8 sovereignty, delivery action, audit log, orchestrator, and CLI."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Pepsi M"}]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8",
+  "ruff>=0.5",
+]
+
+[tool.setuptools]
+packages = ["contracts", "sovereignty_compliance", "delivery_action", "audit_log", "orchestrator"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
