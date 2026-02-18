@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fusionintel-core"
-version = "0.2.1"
+version = "0.2.5"
 description = "FusionIntel Core: Layer 4–9 sovereignty, delivery action, audit log, orchestrator, CLI, and API."
 readme = "README.md"
 requires-python = ">=3.10"
