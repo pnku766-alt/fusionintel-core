@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
 import uuid
@@ -121,7 +121,7 @@ def healthz() -> dict[str, str]:
 
 
 @app.post("/v1/process")
-def process(req: ProcessRequest, x_api_key: Optional[str] = Header(default=None)) -> dict[str, Any]:
+def process(request: Request, req: ProcessRequest, x_api_key: Optional[str] = Header(default=None)) -> dict[str, Any]:
     _require_api_key(x_api_key)
 
     policy = _build_policy(req.policy, req.options)
@@ -147,7 +147,7 @@ def process(req: ProcessRequest, x_api_key: Optional[str] = Header(default=None)
         )
 
     return {
-        "request_id": getattr(getattr(__import__("fastapi"), "Request", object), "__name__", None) or None,
+        "request_id": getattr(request.state, "request_id", None),
         "layer4": {"allow": result.layer4.allow, "reasons": list(result.layer4.reasons)},
         "layer5": {"allow": result.layer5.allow, "action": result.layer5.action.value, "reasons": list(result.layer5.reasons)},
         "audit_written": result.audit_written,

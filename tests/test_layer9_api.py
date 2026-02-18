@@ -78,3 +78,9 @@ def test_auth_enabled_requires_key(monkeypatch) -> None:
     # correct key => 200
     r = client.post("/v1/process", json=body, headers={"x-api-key": "secret"})
     assert r.status_code == 200
+def test_request_id_roundtrip() -> None:
+    body = {"policy": _base_policy(), "envelope": _base_envelope()}
+    r = client.post("/v1/process", json=body, headers={"x-request-id": "rid-123"})
+    assert r.status_code == 200
+    assert r.headers.get("x-request-id") == "rid-123"
+    assert r.json().get("request_id") == "rid-123"
