@@ -1,5 +1,0 @@
-audit_log
-contracts
-delivery_action
-orchestrator
-sovereignty_compliance
