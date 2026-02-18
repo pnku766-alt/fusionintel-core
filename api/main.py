@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import os
+import uuid
 from typing import Any, Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from audit_log import AuditPolicy
@@ -22,6 +24,13 @@ class ProcessRequest(BaseModel):
     policy: dict[str, Any] = Field(default_factory=dict)
     envelope: dict[str, Any] = Field(default_factory=dict)
     options: ProcessOptions = Field(default_factory=ProcessOptions)
+
+
+def _bool_env(name: str, default: bool = False) -> bool:
+    v = os.getenv(name, "")
+    if v == "":
+        return default
+    return v.strip().lower() in ("1", "true", "yes", "y", "on")
 
 
 def _build_policy(policy_raw: dict[str, Any], options: ProcessOptions) -> OrchestratorPolicy:
@@ -47,16 +56,23 @@ def _build_policy(policy_raw: dict[str, Any], options: ProcessOptions) -> Orches
         redact_payload_keys=tuple(layer6_raw.get("redact_payload_keys", [])),
     )
 
-    # API request options can override policy file value
     audit_log_path = options.audit_log_path if options.audit_log_path is not None else policy_raw.get("audit_log_path")
+
+    # allow env overrides too
+    env_audit = os.getenv("FUSIONINTEL_AUDIT_LOG_PATH")
+    if env_audit:
+        audit_log_path = env_audit
+
+    enforce_layer4 = bool(options.enforce_layer4) or _bool_env("FUSIONINTEL_ENFORCE_L4", False)
+    enforce_layer5 = bool(options.enforce_layer5) or _bool_env("FUSIONINTEL_ENFORCE_L5", False)
 
     return OrchestratorPolicy(
         layer4=layer4,
         layer5=layer5,
         layer6=layer6,
         audit_log_path=audit_log_path,
-        enforce_layer4=bool(options.enforce_layer4),
-        enforce_layer5=bool(options.enforce_layer5),
+        enforce_layer4=enforce_layer4,
+        enforce_layer5=enforce_layer5,
     )
 
 
@@ -78,7 +94,25 @@ def _build_envelope(envelope_raw: dict[str, Any]) -> ArtifactEnvelope:
     )
 
 
-app = FastAPI(title="FusionIntel Core API", version="0.2.0")
+app = FastAPI(title="FusionIntel Core API", version="0.2.2")
+
+
+@app.middleware("http")
+async def add_request_id(request: Request, call_next):
+    rid = request.headers.get("x-request-id") or str(uuid.uuid4())
+    request.state.request_id = rid
+    response = await call_next(request)
+    response.headers["x-request-id"] = rid
+    return response
+
+
+def _require_api_key(x_api_key: Optional[str]) -> None:
+    required = os.getenv("FUSIONINTEL_API_KEY", "")
+    if not required:
+        # no key set => auth disabled (dev-friendly)
+        return
+    if not x_api_key or x_api_key != required:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
 
 @app.get("/healthz")
@@ -87,7 +121,9 @@ def healthz() -> dict[str, str]:
 
 
 @app.post("/v1/process")
-def process(req: ProcessRequest) -> dict[str, Any]:
+def process(req: ProcessRequest, x_api_key: Optional[str] = Header(default=None)) -> dict[str, Any]:
+    _require_api_key(x_api_key)
+
     policy = _build_policy(req.policy, req.options)
     envelope = _build_envelope(req.envelope)
 
@@ -101,7 +137,6 @@ def process(req: ProcessRequest) -> dict[str, Any]:
             enforce_layer5=policy.enforce_layer5,
         )
     except PermissionError:
-        # mirror CLI behavior: report as enforcement_error but still return decisions
         enforcement_error = True
         result = process_envelope(
             envelope=envelope,
@@ -112,6 +147,7 @@ def process(req: ProcessRequest) -> dict[str, Any]:
         )
 
     return {
+        "request_id": getattr(getattr(__import__("fastapi"), "Request", object), "__name__", None) or None,
         "layer4": {"allow": result.layer4.allow, "reasons": list(result.layer4.reasons)},
         "layer5": {"allow": result.layer5.allow, "action": result.layer5.action.value, "reasons": list(result.layer5.reasons)},
         "audit_written": result.audit_written,

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 from fastapi.testclient import TestClient
 
 from api.main import app
@@ -58,3 +60,21 @@ def test_process_blocks_when_layer4_not_allowed_and_layer5_requires_layer4() -> 
     j = r.json()
     assert j["layer4"]["allow"] is False
     assert j["layer5"]["action"] == "block"
+
+
+def test_auth_enabled_requires_key(monkeypatch) -> None:
+    monkeypatch.setenv("FUSIONINTEL_API_KEY", "secret")
+
+    body = {"policy": _base_policy(), "envelope": _base_envelope()}
+
+    # missing key => 401
+    r = client.post("/v1/process", json=body)
+    assert r.status_code == 401
+
+    # wrong key => 401
+    r = client.post("/v1/process", json=body, headers={"x-api-key": "nope"})
+    assert r.status_code == 401
+
+    # correct key => 200
+    r = client.post("/v1/process", json=body, headers={"x-api-key": "secret"})
+    assert r.status_code == 200
