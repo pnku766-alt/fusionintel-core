@@ -1,11 +1,11 @@
-[build-system]
+﻿[build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "fusionintel-core"
 version = "0.1.0"
-description = "FusionIntel Core: Layer 4–8 sovereignty, delivery action, audit log, orchestrator, and CLI."
+description = "FusionIntel Core: Layer 4â€“8 sovereignty, delivery action, audit log, orchestrator, and CLI."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -17,8 +17,12 @@ dev = [
   "pytest>=8",
   "ruff>=0.5",
 ]
-
-[tool.setuptools]
+api = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "pydantic>=2.0",
+  "httpx>=0.24",
+][tool.setuptools]
 packages = ["contracts", "sovereignty_compliance", "delivery_action", "audit_log", "orchestrator"]
 
 [tool.pytest.ini_options]
