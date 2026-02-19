@@ -6,15 +6,23 @@ import sys
 from pathlib import Path
 
 
+# ---- Placement rules (FusionIntel) ----
+
 WORKFLOW_RULE = (
     "Workflow files must be placed in .github/workflows/*.yml",
-    re.compile(r"^\.github/workflows/[^/]+\.yml$"),
+    re.compile(r"^\.github/workflows/[^/]+\.ya?ml$"),
 )
+
 SCHEMA_RULE = (
     "JSON policy/schema files must be placed in schemas/*.json or policies/*.json",
     re.compile(r"^(schemas|policies)/[^/]+\.json$"),
 )
-DOC_RULE = ("Docs files must be placed in docs/*.md or README.md", re.compile(r"^(docs/[^/]+\.md|README\.md)$"))
+
+DOC_RULE = (
+    "Docs files must be placed in docs/*.md or README.md",
+    re.compile(r"^(docs/[^/]+\.md|README\.md)$"),
+)
+
 SCRIPT_RULE = ("Scripts must be placed in scripts/*", re.compile(r"^scripts/.+"))
 
 LEGACY_PYTHON_PREFIXES = (
@@ -27,6 +35,15 @@ LEGACY_PYTHON_PREFIXES = (
 )
 
 ALLOWED_PYTHON = re.compile(r"^(fusionintel_core/.+\.py|scripts/[^/]+\.py|tests/.+\.py)$")
+
+# YAML files that are valid outside .github/workflows
+YAML_ALLOWLIST = {
+    ".pre-commit-config.yaml",
+    ".pre-commit-config.yml",
+    ".github/dependabot.yml",
+    ".github/dependabot.yaml",
+}
+
 FILETYPE_GUARDS = {
     ".yml": WORKFLOW_RULE,
     ".yaml": WORKFLOW_RULE,
@@ -50,6 +67,10 @@ def _check_path(path: Path) -> list[str]:
     posix = path.as_posix()
     suffix = path.suffix.lower()
 
+    # YAML special-case: allowlisted yaml is allowed at specific paths
+    if suffix in {".yml", ".yaml"} and posix in YAML_ALLOWLIST:
+        return errors
+
     if suffix in FILETYPE_GUARDS:
         msg, pattern = FILETYPE_GUARDS[suffix]
         if not pattern.match(posix):
@@ -65,6 +86,7 @@ def _check_path(path: Path) -> list[str]:
 def _check_content(path: Path) -> list[str]:
     errors: list[str] = []
     suffix = path.suffix.lower()
+
     # only scan “human-edited / paste-prone” files
     if suffix not in {".ps1", ".md"}:
         return errors
@@ -72,7 +94,6 @@ def _check_content(path: Path) -> list[str]:
     try:
         content = path.read_text(encoding="utf-8")
     except UnicodeDecodeError:
-        # don't block on encoding weirdness; keep fail-closed elsewhere
         return errors
 
     for pat in PASTE_PATTERNS:
