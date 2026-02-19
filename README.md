@@ -36,7 +36,7 @@ type pyproject.toml | Select-Object -First 20
 python -m pip install -e .[dev]
 python -m pip install -e ".[dev]"
 function Write-FileUtf8NoBom([string], [string]) {
-   = Split-Path -Parent 
+   = Split-Path -Parent
   if ( -and !(Test-Path )) { New-Item -ItemType Directory -Force -Path  | Out-Null }
    = New-Object System.Text.UTF8Encoding(False)
   [System.IO.File]::WriteAllText((Resolve-Path .).Path + "\" + , .Replace("

@@ -1,0 +1,6 @@
+﻿# Normalize text files to LF in repo; let editors convert on checkout
+* text=auto eol=lf
+
+# Keep PowerShell scripts CRLF for Windows friendliness
+*.ps1 text eol=crlf
+*.bat text eol=crlf

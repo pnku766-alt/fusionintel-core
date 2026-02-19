@@ -474,8 +474,8 @@ A “tenant” is a security boundary. Cross-tenant access must be impossible by
 
 ---
 # FusionIntel Reference Architecture
-**Version:** 0.1 (Phase 2 Draft)  
-**Status:** SYSTEM FORMED, ENFORCEMENT ACTIVE  
+**Version:** 0.1 (Phase 2 Draft)
+**Status:** SYSTEM FORMED, ENFORCEMENT ACTIVE
 
 ---
 
@@ -513,12 +513,12 @@ FusionIntel addresses these failure modes by making **policy explicit**, **enfor
 - **Audit Sink** (append-only)
 
 ### 3.2 Control Flow
-1) Receive request + envelope  
-2) Load active signed policy version  
-3) Evaluate Layer 4 (sovereignty gate)  
-4) Evaluate Layer 5 (action decision)  
-5) Evaluate Layer 6 (audit rules; snapshot policy)  
-6) Return decision + write audit record  
+1) Receive request + envelope
+2) Load active signed policy version
+3) Evaluate Layer 4 (sovereignty gate)
+4) Evaluate Layer 5 (action decision)
+5) Evaluate Layer 6 (audit rules; snapshot policy)
+6) Return decision + write audit record
 
 ---
 
