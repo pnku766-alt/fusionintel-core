@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fusionintel.ai/schemas/fusionintel.policy-bundle.schema.json",
+  "title": "FusionIntel Policy Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_version", "scope", "signing", "layers", "meta"],
+  "properties": {
+    "policy_version": { "type": "string", "minLength": 1 },
+    "scope": { "type": "string", "enum": ["global", "tenant", "environment", "project"] },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "owner", "created_utc"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "created_utc": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" }
+      }
+    },
+    "signing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key_id", "algorithm", "signature_required"],
+      "properties": {
+        "key_id": { "type": "string", "minLength": 1 },
+        "algorithm": { "type": "string", "enum": ["ed25519", "ecdsa-p256", "rsa-pss-sha256"] },
+        "signature_required": { "type": "boolean", "const": true }
+      }
+    },
+    "layers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["layer4", "layer5", "layer6"],
+      "properties": {
+        "layer4": { "type": "object" },
+        "layer5": { "type": "object" },
+        "layer6": { "type": "object" }
+      }
+    }
+  }
+}
