@@ -1,7 +1,10 @@
-__pycache__/
+﻿__pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
 venv/
 .env
 fusionintel_core.egg-info/
+# FusionIntel local artifacts
+audit.jsonl
+req.json
